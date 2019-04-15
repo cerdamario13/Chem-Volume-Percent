@@ -1,0 +1,242 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Feb 20 10:49:31 2019
+
+@author: cerda
+"""
+
+# chemblending2
+
+# second attment at making an excel sheet of all the formulations
+import xlswriter
+
+workbook = xlsxwriter.Workbook('Blending2.xlsx')
+worksheet = workbook.add_worksheet()
+ws = worksheet  # Shortening the varibale
+
+# Adding a bold format to use
+bold = workbook.add_format({'bold': True})
+cell_format02 = workbook.add_format()
+# Two Decimal format
+cell_format02.set_num_format('0.00')
+
+# Title of chemical
+name = input("Name: ")
+ws.write('A1', name, bold)  # Printing the name of the chemical in bold
+ws.write('B1', '% Vol', bold)
+ws.write('C1', 'g', bold)
+
+# Asking how many raw materials in chemical formulation
+numRaw = int(input("How many raw materials? "))
+
+# writing the RAW Materials
+rawForm = []  # used for the formlations
+rowWrite = 0;  # for the 1st column
+for nameRaw in range(0, numRaw):
+    raw1 = input('Material: ')
+    rawForm.append(raw1)  # llist for formulations
+    rowWrite += 1
+    # writing in excel
+    ws.write(rowWrite, 0, raw1)  # writes in every column
+    if numRaw == rowWrite:  # add TOTAL at the bottom of the entries
+        ws.write(rowWrite + 1, 0, 'Total', bold)  # Main Formulation
+
+# getting the index with the max length and using it as cell dimensions
+lengths = [len(l) for l in rawForm[1:]]
+maxLength = max(lengths)
+ws.set_column(0, 0, maxLength)
+
+# Divider
+print('***')
+print('Percentages')
+print('***')
+
+# adding the percentages
+numRawList = []  # creating an empty list first
+for i in range(0, numRaw):  # set the loop to run equal times the
+    number = float(input('Percent: '))
+    numRawList.append(number)
+
+# printing the percentages in excel
+rowWrite1 = 1  # for the second column BUT starting in the 2nd row
+for nums in (numRawList):
+    ws.write(rowWrite1, 1, nums)
+    rowWrite1 += 1
+# writing the sum at the end of the percentages
+sumPercent = sum(numRawList)
+ws.write(rowWrite1, 1, sumPercent)
+
+# aksing the user what size of blend to make
+sizeBlend = float(input('Size of blend: '))
+# multyplying every element by SIZE of BLEND
+numRawListSize = []
+for size in numRawList:
+    numRawListSize.append(size * sizeBlend)
+
+# printing the size in excel
+rowWriterSize = 1  # for the C column
+# ***THIS will be used as a bease to separate the new formulations
+# on the ecel sheet
+for size1 in (numRawListSize):
+    ws.write(rowWriterSize, 2, size1)
+    rowWriterSize += 1
+# writing the sum at the end of the size of blend
+sumSize = sum(numRawListSize)
+ws.write(rowWriterSize, 2, sumSize)
+
+# -------DEPENDANT, ALTERNATING, INCREMENT-----
+# selecting the material to alternate
+alterRaw = input('Alternating: ')  # asking for the index
+alterRaw = int(alterRaw) - 1  # Selecting the index,
+# in this case the Nth element in the list
+alterNewNum = float(input('New alternating Number: '))
+# selecting the material that will be dependant on the alternate
+# ----dependant---
+dependRaw = int(input('Dependant: ')) - 1  # selecting the index.
+# and dealing with 0 base index
+
+# selecting the increments
+incrementRaw = float(input('Increment: '))  # will be in decimals
+incrementNum = [1, 2, 3]  # only 3 since we are doing 3 formulations
+# multyplying every number in list by a number
+incrementNum = [y * incrementRaw for y in incrementNum]
+
+# ----FORMULATION 1------
+# Below everything will have '1' at the end for Fromulation 1
+# Starting the new blends. At least one space below the TOTAL
+space1 = 3  # separation space
+rowWriterForm1 = rowWriterSize + space1  # printing with one space separation NAMES
+rowWriterForm11 = rowWriterSize + space1  # for percentages
+rowWriterForm111 = rowWriterSize + space1
+ws.write(rowWriterForm1 - 1, 0, name + '-1', bold)
+
+# writing the raw materials for new formulation
+for form1 in rawForm:
+    ws.write(rowWriterForm1, 0, form1)
+    rowWriterForm1 += 1
+# writing the total at the end
+ws.write(rowWriterForm1, 0, 'TOTAL', bold)
+
+# writing the new percent volumes taking into account the
+# the alternating volume and making sure it adds all to 1
+numRawList1 = numRawList  # creating a copy of the list
+
+# Replacing the value in the selected index and selected number
+numRawList1[alterRaw] = alterNewNum  # changing the number
+numRawList1.pop(dependRaw)  # taking out the dependant
+sum1 = 1 - sum(numRawList1)  # making sure the sum equals one
+# add the sum1 to the new list
+numRawList1.insert(dependRaw, sum1)  # adding the sum1 to the list
+# printing the new list
+for form1Num in numRawList1:
+    ws.write(rowWriterForm11, 1, form1Num)
+    rowWriterForm11 += 1
+# total at the end of the list
+sumTotal1 = sum(numRawList1)
+ws.write(rowWriterForm1, 1, sumTotal1)
+
+# size of the blend
+numRawListSize1 = []
+for size1 in numRawList1:
+    numRawListSize1.append(size1 * sizeBlend)
+
+# printing the size in excel
+for size11 in numRawListSize1:
+    ws.write(rowWriterForm111, 2, size11, cell_format02)
+    rowWriterForm111 += 1
+# total at the end
+sumSize1 = sum(numRawListSize1)
+ws.write(rowWriterForm111, 2, sumSize1)
+
+# ---------FORMULATION 2---------
+space2 = 3
+rowWriterForm2 = rowWriterForm1 + space2  # for material names
+rowWriterForm22 = rowWriterForm1 + space2  # for percentages
+rowWriterForm222 = rowWriterForm1 + space2
+ws.write(rowWriterForm2 - 1, 0, name + '-2', bold)
+
+# writing the raw materials for new formulations
+for form1 in rawForm:
+    ws.write(rowWriterForm2, 0, form1)
+    rowWriterForm2 += 1
+# writing total at the end
+ws.write(rowWriterForm2, 0, 'TOTAL', bold)
+
+# writing the new percents
+numRawList2 = numRawList1  # creating a copy of previous list
+
+# replacing the value in the selected index
+numRawList2[alterRaw] = alterNewNum + incrementNum[0]
+numRawList2.pop(dependRaw)
+sum2 = 1 - sum(numRawList2)
+# addinf the sum to the new list
+numRawList2.insert(dependRaw, sum2)
+# prinitng the new list of percentages
+for form2Num in numRawList2:
+    ws.write(rowWriterForm22, 1, form2Num)
+    rowWriterForm22 += 1
+# total at the end
+sumTotal2 = sum(numRawList2)
+ws.write(rowWriterForm22, 1, sumTotal2)
+
+# size fo the blend
+numRawListSize2 = []
+for size2 in numRawList2:
+    numRawListSize2.append(size2 * sizeBlend)
+# printing in excel
+for size22 in numRawListSize2:
+    ws.write(rowWriterForm222, 2, size22, cell_format02)
+    rowWriterForm222 += 1
+# total at the end
+sumSize2 = sum(numRawListSize2)
+ws.write(rowWriterForm222, 2, sumSize2)
+
+# --------Fromulation 3---------
+space3 = 3
+rowWriterForm3 = rowWriterForm2 + space3  # for material names
+rowWriterForm33 = rowWriterForm2 + space3  # for percentages
+rowWriterForm333 = rowWriterForm2 + space3
+ws.write(rowWriterForm3 - 1, 0, name + '-3', bold)
+
+# writing the raw materials for new formulations
+for form3 in rawForm:
+    ws.write(rowWriterForm3, 0, form3)
+    rowWriterForm3 += 1
+# Writing total at the end
+ws.write(rowWriterForm3, 0, 'TOTAL', bold)
+
+# writing the new percentages
+numRawList3 = numRawList2  # creating a copy of the prevous list
+
+# replacing the value on the selected index
+numRawList3[alterRaw] = alterNewNum + incrementNum[2]
+numRawList3.pop(dependRaw)
+sum3 = 1 - sum(numRawList3)
+# adding the new list
+numRawList3.insert(dependRaw, sum3)
+# printing the new list of percentages
+for form3Num in numRawList3:
+    ws.write(rowWriterForm33, 1, form3Num)
+    rowWriterForm33 += 1
+# total at the end
+sumTotal3 = sum(numRawList3)
+ws.write(rowWriterForm33, 1, sumTotal3)
+
+# size of the blend
+numRawListSize3 = []
+for size3 in numRawList3:
+    numRawListSize3.append(size3 * sizeBlend)
+# Printing in excel
+for size33 in numRawListSize3:
+    ws.write(rowWriterForm333, 2, size33, cell_format02)
+    rowWriterForm333 += 1
+# total at the end
+sumSize3 = sum(numRawListSize3)
+ws.write(rowWriterForm333, 2, sumSize3)
+
+# closing the workbook
+workbook.close()
+
+
+
+
